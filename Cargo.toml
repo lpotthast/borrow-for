@@ -11,7 +11,14 @@ documentation = "https://docs.rs/borrow-for"
 repository = "https://github.com/lpotthast/borrow-for"
 categories = ["no-std", "rust-patterns"]
 keywords = ["borrow", "borrowing", "generic", "no-std"]
-include = ["/src/**", "/tests/borrowing.rs", "/README.md", "/COVERAGE.md", "/CHANGELOG.md", "/LICENSE-*"]
+include = [
+    "/src/**",
+    "/tests/borrowing.rs",
+    "/README.md",
+    "/COVERAGE.md",
+    "/CHANGELOG.md",
+    "/LICENSE-*",
+]
 
 [package.metadata.docs.rs]
 all-features = true
