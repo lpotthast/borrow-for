@@ -13,7 +13,7 @@ categories = ["no-std", "rust-patterns"]
 keywords = ["borrow", "borrowing", "generic", "no-std"]
 include = [
     "/src/**",
-    "/tests/borrowing.rs",
+    "/tests/**",
     "/README.md",
     "/COVERAGE.md",
     "/CHANGELOG.md",
