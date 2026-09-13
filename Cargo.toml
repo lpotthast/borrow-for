@@ -1,0 +1,22 @@
+[package]
+name = "borrow-for"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.1"
+authors = ["Lukas Potthast <privat@lukas-potthast.de>"]
+description = "Context-dependent selection of borrowed representations."
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+documentation = "https://docs.rs/borrow-for"
+repository = "https://github.com/lpotthast/borrow-for"
+categories = ["no-std", "rust-patterns"]
+keywords = ["borrow", "borrowing", "generic", "no-std"]
+include = ["/src/**", "/tests/borrowing.rs", "/README.md", "/COVERAGE.md", "/CHANGELOG.md", "/LICENSE-*"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+alloc = []
+std = ["alloc"]

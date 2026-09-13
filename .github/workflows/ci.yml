@@ -1,0 +1,80 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - run: cargo +nightly fmt --all -- --check
+
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: core
+            args: --no-default-features
+          - feature: alloc
+            args: --no-default-features --features alloc
+          - feature: std
+            args: ""
+    env:
+      RUSTDOCFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test ${{ matrix.args }} --locked
+      - run: cargo clippy --all-targets ${{ matrix.args }} --locked -- -D warnings -W clippy::pedantic
+      - run: cargo doc --no-deps ${{ matrix.args }} --locked
+      - run: cargo package --locked
+        if: matrix.feature == 'std'
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.85.1
+      - run: cargo test --no-default-features --features alloc --locked
+      - run: cargo test --locked
+      - run: cargo test --no-default-features --locked
+
+  no-std:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - thumbv8m.main-none-eabihf # With pointer atomics.
+          - thumbv6m-none-eabi # Without pointer atomics.
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - run: cargo check --lib --no-default-features --target ${{ matrix.target }} --locked
+      - run: cargo check --lib --no-default-features --features alloc --target ${{ matrix.target }} --locked
