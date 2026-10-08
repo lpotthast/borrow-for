@@ -213,6 +213,29 @@ fn family_sequences_compare_owned_and_borrowed_elements_in_both_directions() {
     assert!(equal(&borrowed[..], &owned[..]));
     assert!(equal(&borrowed[..], &mut owned_expected[..]));
     assert!(!equal(&borrowed, vec![String::from("other")]));
+
+    // Arrays of the same length and slice references also work in both directions.
+    let owned_array = [String::from("hello"), String::from("world")];
+    let mut borrowed_array = ["hello", "world"];
+    assert_view::<[String; 2], [&str; 2]>(&borrowed_array, &borrowed_array);
+    assert_view::<[String; 2], [&str; 2]>(&&borrowed_array, &borrowed_array);
+    assert_view::<[&str; 2], [String; 2]>(&owned_array, &owned_array);
+    assert_view::<[&str; 2], [String; 2]>(&&owned_array, &owned_array);
+    assert!(equal(&owned_array, borrowed_array));
+    assert!(equal(&owned_array, &borrowed_array));
+    assert!(equal(&owned_array, &mut borrowed_array));
+    assert!(!equal(&owned_array, ["hello", "other"]));
+    assert!(equal(&borrowed_array, owned_array.clone()));
+    assert!(equal(&borrowed_array, &owned_array));
+    assert!(!equal(&borrowed_array, [String::new(), String::new()]));
+
+    let owned_slice = &owned[..];
+    let borrowed_slice = &borrowed[..];
+    assert_view::<&[String], &[&str]>(&borrowed_slice, &borrowed_slice);
+    assert_view::<&[&str], &[String]>(&owned_slice, &owned_slice);
+    assert!(equal(&owned_slice, borrowed_slice));
+    assert!(equal(&borrowed_slice, owned_slice));
+    assert!(!equal(&owned_slice, &borrowed[..1]));
 }
 
 #[cfg(feature = "alloc")]
@@ -270,4 +293,8 @@ fn paths_and_os_strings_support_owned_and_borrowed_contexts() {
     let os_strings = vec![OsString::from("a")];
     assert!(equal(&os_strings, vec![OsStr::new("a")]));
     assert!(equal(&vec![OsStr::new("a")], os_strings));
+    let path_array = [PathBuf::from("a")];
+    assert!(equal(&path_array, [Path::new("a")]));
+    assert!(equal(&[Path::new("a")], &path_array));
+    assert!(equal(&&path_array[..], &[Path::new("a")][..]));
 }

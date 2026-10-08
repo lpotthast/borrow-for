@@ -85,23 +85,28 @@ equality, cloning, or formatting support, apart from the `ToOwned` bounds shown 
 ### Sequences of one owned and borrowed family
 
 Sequences whose elements are one family's owned values in the context and references to its
-borrowed type in the input, or the other way around, also cover vectors and slices. `O` and `B`
-are the pairs from the family table above, such as `String` and `str`.
+borrowed type in the input, or the other way around, also cover vectors, slices, and arrays of
+the same length. `O` and `B` are the pairs from the family table above, such as `String` and
+`str`.
 
-| Context    | Input                               | View       | Feature                    |
-|------------|-------------------------------------|------------|----------------------------|
-| `Vec<O>`   | `Vec<&B>`                           | `[&B]`     | Family's (`alloc`, `std`)  |
-| `Vec<O>`   | `&Vec<&B>`, `&mut Vec<&B>`          | `Vec<&B>`  | Family's                   |
-| `Vec<&B>`  | `Vec<O>`                            | `[O]`      | Family's                   |
-| `Vec<&B>`  | `&Vec<O>`, `&mut Vec<O>`            | `Vec<O>`   | Family's                   |
-| `[O]`      | `[&B]`, `&[&B]`, `&mut [&B]`        | `[&B]`     | Family's                   |
-| `[&B]`     | `[O]`, `&[O]`, `&mut [O]`           | `[O]`      | Family's                   |
+| Context   | Input                                 | View       | Feature                   |
+|-----------|---------------------------------------|------------|---------------------------|
+| `Vec<O>`  | `Vec<&B>`                             | `[&B]`     | Family's (`alloc`, `std`) |
+| `Vec<O>`  | `&Vec<&B>`, `&mut Vec<&B>`            | `Vec<&B>`  | Family's                  |
+| `Vec<&B>` | `Vec<O>`                              | `[O]`      | Family's                  |
+| `Vec<&B>` | `&Vec<O>`, `&mut Vec<O>`              | `Vec<O>`   | Family's                  |
+| `[O]`     | `[&B]`, `&[&B]`, `&mut [&B]`          | `[&B]`     | Family's                  |
+| `[&B]`    | `[O]`, `&[O]`, `&mut [O]`             | `[O]`      | Family's                  |
+| `[O; N]`  | `[&B; N]`, `&[&B; N]`, `&mut [&B; N]` | `[&B; N]`  | Family's                  |
+| `[&B; N]` | `[O; N]`, `&[O; N]`, `&mut [O; N]`    | `[O; N]`   | Family's                  |
+| `&[O]`    | `&'s [&B]`                            | `&'s [&B]` | Family's                  |
+| `&[&B]`   | `&'s [O]`                             | `&'s [O]`  | Family's                  |
 
 The views keep the input's element type, so comparing them needs `PartialEq` between `O` and
 `&B`. `String`, `PathBuf`, and `OsString` sequences compare with their borrowed counterparts in
 both directions. `CString` and `&CStr` elements cannot be compared on Rust 1.85.1. Rust 1.90
-and later compare a `Vec<CString>` or `[CString]` context with `&CStr` elements, but not a
-`Vec<&CStr>` or `[&CStr]` context with `CString` elements.
+and later compare a context of `CString` elements with `&CStr` elements, but not a context of
+`&CStr` elements with `CString` elements.
 
 For a `Cow<[T]>` context, the views are slice references or vectors. These match the forms
 supported by its `PartialEq` implementations on Rust 1.85.1. For example, an `&[U]` input

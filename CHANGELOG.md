@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [0.1.2] - 2026-10-08
+
+### Added
+
+- Arrays of one owned and borrowed family borrow for each other's contexts when they have the same length: `[&str; N]`
+  in a `[String; N]` context and `[String; N]` in a `[&str; N]` context, including references to these arrays.
+- Slice references of one family borrow for each other's contexts: `&[&str]` in an `&[String]` context and `&[String]`
+  in an `&[&str]` context.
+
 ## [0.1.1] - 2026-10-08
 
 ### Added
@@ -24,3 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Built-in implementations for values, references, arrays, strings, slices and smart pointers.
 - No runtime dependencies. The default `std` feature includes `alloc`; disabling default features allows `no_std` use.
 - Requires Rust 1.85.1 or later.
+
+[Unreleased]: https://github.com/lpotthast/borrow-for/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/lpotthast/borrow-for/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/lpotthast/borrow-for/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/lpotthast/borrow-for/releases/tag/v0.1.0

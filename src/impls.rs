@@ -137,9 +137,6 @@ macro_rules! owned_borrowed {
     };
 }
 
-// Sequences of one family's owned values and borrowed references to them, in either direction:
-// `Vec<&str>` in a `Vec<String>` context, `[String]` in a `[&str]` context. Unlike sequences of
-// arbitrary element types, these concrete pairs cannot overlap the generic implementations.
 // Keep this policy in sync with the family sequence table in COVERAGE.md.
 #[cfg(feature = "alloc")]
 macro_rules! owned_borrowed_sequences {
@@ -180,6 +177,32 @@ macro_rules! owned_borrowed_sequences {
         }
         impl<'c> BorrowFor<[&'c $borrowed]> for &mut [$owned] {
             type View = [$owned];
+        }
+
+        impl<'b, const N: usize> BorrowFor<[$owned; N]> for [&'b $borrowed; N] {
+            type View = [&'b $borrowed; N];
+        }
+        impl<'b, const N: usize> BorrowFor<[$owned; N]> for &[&'b $borrowed; N] {
+            type View = [&'b $borrowed; N];
+        }
+        impl<'b, const N: usize> BorrowFor<[$owned; N]> for &mut [&'b $borrowed; N] {
+            type View = [&'b $borrowed; N];
+        }
+        impl<'c, const N: usize> BorrowFor<[&'c $borrowed; N]> for [$owned; N] {
+            type View = [$owned; N];
+        }
+        impl<'c, const N: usize> BorrowFor<[&'c $borrowed; N]> for &[$owned; N] {
+            type View = [$owned; N];
+        }
+        impl<'c, const N: usize> BorrowFor<[&'c $borrowed; N]> for &mut [$owned; N] {
+            type View = [$owned; N];
+        }
+
+        impl<'s, 'b> BorrowFor<&[$owned]> for &'s [&'b $borrowed] {
+            type View = &'s [&'b $borrowed];
+        }
+        impl<'s, 'c> BorrowFor<&[&'c $borrowed]> for &'s [$owned] {
+            type View = &'s [$owned];
         }
     };
 }
