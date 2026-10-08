@@ -80,7 +80,7 @@ Add the crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-borrow-for = "0.1.0"
+borrow-for = "0.1.1"
 ```
 
 ## Features

@@ -137,6 +137,53 @@ macro_rules! owned_borrowed {
     };
 }
 
+// Sequences of one family's owned values and borrowed references to them, in either direction:
+// `Vec<&str>` in a `Vec<String>` context, `[String]` in a `[&str]` context. Unlike sequences of
+// arbitrary element types, these concrete pairs cannot overlap the generic implementations.
+// Keep this policy in sync with the family sequence table in COVERAGE.md.
+#[cfg(feature = "alloc")]
+macro_rules! owned_borrowed_sequences {
+    ($owned:ty, $borrowed:ty) => {
+        impl<'b> BorrowFor<Vec<$owned>> for Vec<&'b $borrowed> {
+            type View = [&'b $borrowed];
+        }
+        impl<'b> BorrowFor<Vec<$owned>> for &Vec<&'b $borrowed> {
+            type View = Vec<&'b $borrowed>;
+        }
+        impl<'b> BorrowFor<Vec<$owned>> for &mut Vec<&'b $borrowed> {
+            type View = Vec<&'b $borrowed>;
+        }
+        impl<'c> BorrowFor<Vec<&'c $borrowed>> for Vec<$owned> {
+            type View = [$owned];
+        }
+        impl<'c> BorrowFor<Vec<&'c $borrowed>> for &Vec<$owned> {
+            type View = Vec<$owned>;
+        }
+        impl<'c> BorrowFor<Vec<&'c $borrowed>> for &mut Vec<$owned> {
+            type View = Vec<$owned>;
+        }
+
+        impl<'b> BorrowFor<[$owned]> for [&'b $borrowed] {
+            type View = [&'b $borrowed];
+        }
+        impl<'b> BorrowFor<[$owned]> for &[&'b $borrowed] {
+            type View = [&'b $borrowed];
+        }
+        impl<'b> BorrowFor<[$owned]> for &mut [&'b $borrowed] {
+            type View = [&'b $borrowed];
+        }
+        impl<'c> BorrowFor<[&'c $borrowed]> for [$owned] {
+            type View = [$owned];
+        }
+        impl<'c> BorrowFor<[&'c $borrowed]> for &[$owned] {
+            type View = [$owned];
+        }
+        impl<'c> BorrowFor<[&'c $borrowed]> for &mut [$owned] {
+            type View = [$owned];
+        }
+    };
+}
+
 #[cfg(feature = "alloc")]
 owned_borrowed!(String, str);
 #[cfg(feature = "alloc")]
@@ -145,6 +192,15 @@ owned_borrowed!(CString, CStr);
 owned_borrowed!(PathBuf, Path);
 #[cfg(feature = "std")]
 owned_borrowed!(OsString, OsStr);
+
+#[cfg(feature = "alloc")]
+owned_borrowed_sequences!(String, str);
+#[cfg(feature = "alloc")]
+owned_borrowed_sequences!(CString, CStr);
+#[cfg(feature = "std")]
+owned_borrowed_sequences!(PathBuf, Path);
+#[cfg(feature = "std")]
+owned_borrowed_sequences!(OsString, OsStr);
 
 // Cross-container sequence mappings intentionally impose no relationship between T and U.
 impl<T, U, const N: usize> BorrowFor<[T]> for [U; N] {

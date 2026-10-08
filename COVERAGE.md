@@ -82,6 +82,27 @@ equality, cloning, or formatting support, apart from the `ToOwned` bounds shown 
 | `Cow<'_, [T]>` | `&'s mut [U]`                      | `&'s mut [U]` | `alloc`; `[T]: ToOwned` |
 | `Cow<'_, [T]>` | `Vec<U>`, `&Vec<U>`, `&mut Vec<U>` | `Vec<U>`      | `alloc`; `[T]: ToOwned` |
 
+### Sequences of one owned and borrowed family
+
+Sequences whose elements are one family's owned values in the context and references to its
+borrowed type in the input, or the other way around, also cover vectors and slices. `O` and `B`
+are the pairs from the family table above, such as `String` and `str`.
+
+| Context    | Input                               | View       | Feature                    |
+|------------|-------------------------------------|------------|----------------------------|
+| `Vec<O>`   | `Vec<&B>`                           | `[&B]`     | Family's (`alloc`, `std`)  |
+| `Vec<O>`   | `&Vec<&B>`, `&mut Vec<&B>`          | `Vec<&B>`  | Family's                   |
+| `Vec<&B>`  | `Vec<O>`                            | `[O]`      | Family's                   |
+| `Vec<&B>`  | `&Vec<O>`, `&mut Vec<O>`            | `Vec<O>`   | Family's                   |
+| `[O]`      | `[&B]`, `&[&B]`, `&mut [&B]`        | `[&B]`     | Family's                   |
+| `[&B]`     | `[O]`, `&[O]`, `&mut [O]`           | `[O]`      | Family's                   |
+
+The views keep the input's element type, so comparing them needs `PartialEq` between `O` and
+`&B`. `String`, `PathBuf`, and `OsString` sequences compare with their borrowed counterparts in
+both directions. `CString` and `&CStr` elements cannot be compared on Rust 1.85.1. Rust 1.90
+and later compare a `Vec<CString>` or `[CString]` context with `&CStr` elements, but not a
+`Vec<&CStr>` or `[&CStr]` context with `CString` elements.
+
 For a `Cow<[T]>` context, the views are slice references or vectors. These match the forms
 supported by its `PartialEq` implementations on Rust 1.85.1. For example, an `&[U]` input
 keeps `&[U]` as its view in a `Cow<[T]>` context, but uses `[U]` in a `Vec<T>` context.
@@ -94,16 +115,18 @@ keeps `&[U]` as its view in a `Cow<[T]>` context, but uses `[U]` in a `Vec<T>` c
 - Each input type and context together choose exactly one view. Automatically carrying all
   implementations over to references would conflict with the generic implementations above.
   Rust rejects overlapping implementations, so reference support must be added explicitly.
-- Two vectors with different element types need an explicit slice input, as shown below.
-  An implementation for `Vec<U>` in a `Vec<T>` context would also apply when `T = U`, where
-  the generic implementation already borrows the vector as its own type. Rust rejects that
-  overlap. The same limitation applies to `[U]` inputs in `[T]` contexts.
+- Two vectors with different element types need an explicit slice input, as shown below,
+  unless their elements are one family's owned and borrowed types (`Vec<&str>` in a
+  `Vec<String>` context, see above). A generic implementation for `Vec<U>` in a `Vec<T>`
+  context would also apply when `T = U`, where the generic implementation already borrows the
+  vector as its own type. Rust rejects that overlap. The same limitation applies to `[U]`
+  inputs in `[T]` contexts.
 - Custom views must preserve `Borrow`'s equality, ordering, and hashing behavior. Use `AsRef`
   or an accessor when the borrowed data behaves differently. You can extend the table with
   your own input or context types. Rust's orphan rules prevent you from adding an implementation
   when the trait and all types involved come from other crates.
 
-To compare two vectors with different element types, borrow the expected vector as a slice:
+To compare two vectors with other different element types, borrow the expected vector as a slice:
 
 ```rust
 use borrow_for::borrow_for;
