@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.1] - 2026-10-08
+
+### Added
+
+- Vectors and slices of one owned and borrowed family borrow for each other's contexts: `Vec<&str>` and `[&str]` in
+  `Vec<String>` and `[String]` contexts, and `Vec<String>` and `[String]` in `Vec<&str>` and `[&str]` contexts. The
+  same views exist for `CString`/`CStr`, `PathBuf`/`Path`, and `OsString`/`OsStr`. Comparing these sequences needs
+  `PartialEq` between the element types. `String`/`&str`, `PathBuf`/`&Path`, and `OsString`/`&OsStr` sequences
+  compare in both directions. `CString` and `&CStr` elements do not compare on Rust 1.85.1, and Rust 1.90 and later
+  only compare `CString` with `&CStr`, not `&CStr` with `CString`.
 
 ## [0.1.0] - 2026-09-13
 

@@ -184,6 +184,39 @@ fn cow_slices_select_comparable_reference_and_vector_views() {
 
 #[cfg(feature = "alloc")]
 #[test]
+fn family_sequences_compare_owned_and_borrowed_elements_in_both_directions() {
+    let owned = vec![String::from("hello"), String::from("world")];
+    let mut borrowed = vec!["hello", "world"];
+
+    // Owned contexts accept vectors and slices of borrowed elements.
+    assert_view::<Vec<String>, [&str]>(&borrowed, &borrowed[..]);
+    assert_view::<Vec<String>, Vec<&str>>(&&borrowed, &borrowed);
+    assert_view::<[String], [&str]>(&borrowed[..], &borrowed[..]);
+    assert_view::<[String], [&str]>(&&borrowed[..], &borrowed[..]);
+    assert!(equal(&owned, borrowed.clone()));
+    assert!(equal(&owned, &borrowed));
+    assert!(equal(&owned, &mut borrowed));
+    assert!(equal(&owned[..], &borrowed[..]));
+    assert!(equal(&owned[..], &mut borrowed[..]));
+    assert!(!equal(&owned, vec!["hello"]));
+    assert!(!equal(&owned, vec!["hello", "other"]));
+
+    // Borrowed contexts accept vectors and slices of owned elements.
+    let mut owned_expected = owned.clone();
+    assert_view::<Vec<&str>, [String]>(&owned, &owned[..]);
+    assert_view::<Vec<&str>, Vec<String>>(&&owned, &owned);
+    assert_view::<[&str], [String]>(&owned[..], &owned[..]);
+    assert_view::<[&str], [String]>(&&owned[..], &owned[..]);
+    assert!(equal(&borrowed, owned.clone()));
+    assert!(equal(&borrowed, &owned));
+    assert!(equal(&borrowed, &mut owned_expected));
+    assert!(equal(&borrowed[..], &owned[..]));
+    assert!(equal(&borrowed[..], &mut owned_expected[..]));
+    assert!(!equal(&borrowed, vec![String::from("other")]));
+}
+
+#[cfg(feature = "alloc")]
+#[test]
 fn c_strings_support_owned_and_borrowed_contexts() {
     use std::ffi::{CStr, CString};
     let owned = CString::new("hello").unwrap();
@@ -192,6 +225,25 @@ fn c_strings_support_owned_and_borrowed_contexts() {
     assert_view::<CString, CStr>(borrowed, borrowed);
     assert_view::<CStr, CString>(&&owned, &owned);
     assert!(equal(borrowed, owned));
+
+    // Sequences select views in both directions, but `CString` and `&CStr` elements only gained
+    // `PartialEq` in one direction in Rust 1.90, so compare them through `as_c_str` here.
+    let owned = vec![CString::new("a").unwrap(), CString::new("b").unwrap()];
+    let borrowed = vec![c"a", c"b"];
+    assert_view::<Vec<CString>, [&CStr]>(&borrowed, &borrowed[..]);
+    assert_view::<Vec<CString>, Vec<&CStr>>(&&borrowed, &borrowed);
+    assert_view::<[CString], [&CStr]>(&borrowed[..], &borrowed[..]);
+    assert_view::<[CString], [&CStr]>(&&borrowed[..], &borrowed[..]);
+    assert_view::<Vec<&CStr>, [CString]>(&owned, &owned[..]);
+    assert_view::<Vec<&CStr>, Vec<CString>>(&&owned, &owned);
+    assert_view::<[&CStr], [CString]>(&owned[..], &owned[..]);
+    assert_view::<[&CStr], [CString]>(&&owned[..], &owned[..]);
+    let view = borrow_for::<Vec<&CStr>, _>(&owned);
+    assert!(
+        view.iter()
+            .map(CString::as_c_str)
+            .eq(borrowed.iter().copied())
+    );
 }
 
 #[cfg(feature = "std")]
@@ -211,4 +263,11 @@ fn paths_and_os_strings_support_owned_and_borrowed_contexts() {
     assert_view::<OsStr, OsString>(&&os_string, &os_string);
     assert!(equal(&os_string, OsStr::new("hello")));
     assert!(equal(OsStr::new("hello"), os_string));
+
+    let paths = vec![PathBuf::from("a"), PathBuf::from("b")];
+    assert!(equal(&paths, vec![Path::new("a"), Path::new("b")]));
+    assert!(equal(&vec![Path::new("a"), Path::new("b")], &paths));
+    let os_strings = vec![OsString::from("a")];
+    assert!(equal(&os_strings, vec![OsStr::new("a")]));
+    assert!(equal(&vec![OsStr::new("a")], os_strings));
 }
