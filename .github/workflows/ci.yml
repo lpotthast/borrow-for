@@ -40,6 +40,10 @@ jobs:
             args: --no-default-features --features alloc
           - feature: std
             args: ""
+          - feature: serde_json
+            args: --no-default-features --features serde_json
+          - feature: all
+            args: --all-features
     env:
       RUSTDOCFLAGS: "-D warnings"
     steps:
@@ -62,6 +66,7 @@ jobs:
       - run: cargo test --no-default-features --features alloc --locked
       - run: cargo test --locked
       - run: cargo test --no-default-features --locked
+      - run: cargo test --all-features --locked
 
   no-std:
     runs-on: ubuntu-latest
@@ -78,3 +83,4 @@ jobs:
           targets: ${{ matrix.target }}
       - run: cargo check --lib --no-default-features --target ${{ matrix.target }} --locked
       - run: cargo check --lib --no-default-features --features alloc --target ${{ matrix.target }} --locked
+      - run: cargo check --lib --no-default-features --features serde_json --target ${{ matrix.target }} --locked

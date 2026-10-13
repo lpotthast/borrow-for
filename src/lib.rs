@@ -27,8 +27,8 @@ use core::borrow::Borrow;
 /// The crate provides implementations for values, references, and arrays. The `alloc`
 /// feature adds strings, C strings, vectors, `Box`, `Rc`, and `Cow`. It also adds `Arc` on targets
 /// with pointer-sized atomic operations. The default `std` feature enables `alloc` and adds
-/// paths and OS strings. See the [crate documentation](crate) for the view each implementation
-/// chooses.
+/// paths and OS strings. The `serde_json` feature adds strings, numbers, and booleans in JSON value
+/// contexts. See the [crate documentation](crate) for the view each implementation chooses.
 ///
 /// # Implementing `BorrowFor`
 ///

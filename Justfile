@@ -11,6 +11,8 @@ test toolchain="stable":
     cargo +{{toolchain}} test --locked
     cargo +{{toolchain}} test --no-default-features --locked
     cargo +{{toolchain}} test --no-default-features --features alloc --locked
+    cargo +{{toolchain}} test --no-default-features --features serde_json --locked
+    cargo +{{toolchain}} test --all-features --locked
 
 # Run the same suite on the supported Rust baseline.
 test-msrv:
@@ -21,6 +23,7 @@ build-docs:
     RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --locked
     RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --no-default-features --features alloc --locked
     RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --no-default-features --locked
+    RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features --locked
 
 # Update dependencies, sort manifests, and format code.
 tidy:
@@ -35,5 +38,6 @@ verify:
     cargo clippy --all-targets --locked -- -D warnings -W clippy::pedantic
     cargo clippy --all-targets --no-default-features --features alloc --locked -- -D warnings -W clippy::pedantic
     cargo clippy --all-targets --no-default-features --locked -- -D warnings -W clippy::pedantic
+    cargo clippy --all-targets --all-features --locked -- -D warnings -W clippy::pedantic
     just build-docs
     just test-msrv
