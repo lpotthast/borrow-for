@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-13
+
 ### Added
 
 - `str`, `&str`, and `&mut str` borrow as `str` in `OsStr` and `OsString` contexts, and `&str` borrows as itself in an
@@ -43,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - No runtime dependencies. The default `std` feature includes `alloc`; disabling default features allows `no_std` use.
 - Requires Rust 1.85.1 or later.
 
-[Unreleased]: https://github.com/lpotthast/borrow-for/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/lpotthast/borrow-for/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/lpotthast/borrow-for/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/lpotthast/borrow-for/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/lpotthast/borrow-for/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/lpotthast/borrow-for/releases/tag/v0.1.0
