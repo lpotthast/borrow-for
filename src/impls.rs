@@ -368,3 +368,87 @@ where
 {
     type View = Vec<U>;
 }
+
+// UTF-8 strings in OS string contexts. The standard library compares `OsStr` and `OsString`
+// with `str`, so a string literal can stand in for an OS string. The views stay `str`, so they
+// borrow nothing the input does not hold.
+#[cfg(feature = "std")]
+impl BorrowFor<OsStr> for str {
+    type View = str;
+}
+#[cfg(feature = "std")]
+impl BorrowFor<OsStr> for &str {
+    type View = str;
+}
+#[cfg(feature = "std")]
+impl BorrowFor<OsStr> for &mut str {
+    type View = str;
+}
+#[cfg(feature = "std")]
+impl BorrowFor<OsString> for str {
+    type View = str;
+}
+#[cfg(feature = "std")]
+impl BorrowFor<OsString> for &str {
+    type View = str;
+}
+#[cfg(feature = "std")]
+impl BorrowFor<OsString> for &mut str {
+    type View = str;
+}
+// `&OsStr` compares with `&str` through the reference implementation of `PartialEq`, so the
+// view keeps the reference.
+#[cfg(feature = "std")]
+impl<'s> BorrowFor<&OsStr> for &'s str {
+    type View = &'s str;
+}
+
+// Strings, numbers, and booleans in JSON value contexts, matching the `PartialEq`
+// implementations of `serde_json::Value`.
+#[cfg(feature = "serde_json")]
+mod json {
+    use alloc::string::String;
+
+    use serde_json::Value;
+
+    use crate::BorrowFor;
+
+    impl BorrowFor<Value> for str {
+        type View = str;
+    }
+    impl BorrowFor<Value> for &str {
+        type View = str;
+    }
+    impl BorrowFor<Value> for &mut str {
+        type View = str;
+    }
+    impl BorrowFor<Value> for String {
+        type View = String;
+    }
+    impl BorrowFor<Value> for &String {
+        type View = String;
+    }
+    impl BorrowFor<Value> for &mut String {
+        type View = String;
+    }
+
+    macro_rules! scalars {
+        ($($scalar:ty),* $(,)?) => {
+            $(
+                impl BorrowFor<Value> for $scalar {
+                    type View = $scalar;
+                }
+                impl BorrowFor<Value> for &$scalar {
+                    type View = $scalar;
+                }
+                impl BorrowFor<Value> for &mut $scalar {
+                    type View = $scalar;
+                }
+            )*
+        };
+    }
+
+    scalars!(
+        i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, bool,
+    );
+}

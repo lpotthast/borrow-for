@@ -26,4 +26,9 @@ all-features = true
 [features]
 default = ["std"]
 alloc = []
-std = ["alloc"]
+std = ["alloc", "serde_json?/std"]
+# Strings, numbers, and booleans in `serde_json::Value` contexts.
+serde_json = ["alloc", "dep:serde_json"]
+
+[dependencies]
+serde_json = { version = "1.0.140", optional = true, default-features = false, features = ["alloc"] }

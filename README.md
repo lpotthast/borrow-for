@@ -85,11 +85,14 @@ borrow-for = "0.1.2"
 
 ## Features
 
-The crate has no third-party runtime dependencies. By default, it uses the standard library.
-You can disable the default features to use it in `no_std` environments.
+The crate has no third-party runtime dependencies unless you enable `serde_json`. By default, it
+uses the standard library. You can disable the default features to use it in `no_std`
+environments.
 
 - `std` is enabled by default and includes `alloc`. It adds `PathBuf`/`Path` and
-  `OsString`/`OsStr` support.
+  `OsString`/`OsStr` support, including `str` in OS string contexts.
+- `serde_json` adds strings, numbers, and booleans in `serde_json::Value` contexts. It works with
+  `alloc` alone.
 - For `no_std` with allocation, set `default-features = false, features = ["alloc"]`.
   This keeps support for `Box`, `Rc`, `Cow`, strings, C strings, and vectors. It also supports
   `Arc` on targets with pointer-sized atomic operations.
