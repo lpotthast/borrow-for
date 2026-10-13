@@ -309,12 +309,15 @@ fn utf8_strings_borrow_for_os_string_contexts() {
     assert_view::<OsStr, str>(&text, text);
     assert_view::<OsString, str>(&text, text);
     assert_view::<&OsStr, &str>(&text, &text);
+    assert_view::<OsString, &str>(&&text, &text);
 
     let os_string = OsString::from("hello");
     assert!(equal(os_string.as_os_str(), "hello"));
     assert!(equal(&os_string, "hello"));
     assert!(!equal(&os_string, "other"));
     assert!(equal(&os_string.as_os_str(), "hello"));
+    let names = ["hello", "other"];
+    assert!(names.iter().any(|name| equal(&os_string, name)));
 }
 
 #[cfg(feature = "serde_json")]
@@ -324,6 +327,7 @@ fn strings_numbers_and_booleans_borrow_for_json_value_contexts() {
 
     let text = "hello";
     assert_view::<Value, str>(&text, text);
+    assert_view::<Value, &str>(&&text, &text);
     let owned = String::from("hello");
     assert_view::<Value, String>(&&owned, &owned);
     let number = 3_i32;
@@ -339,4 +343,6 @@ fn strings_numbers_and_booleans_borrow_for_json_value_contexts() {
     assert!(equal(&json!(true), true));
     assert!(!equal(&json!("3"), 3));
     assert!(!equal(&json!(3), "3"));
+    let names = ["other", "hello"];
+    assert!(names.iter().any(|name| equal(&json!("hello"), name)));
 }

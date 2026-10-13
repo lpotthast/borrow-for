@@ -396,6 +396,11 @@ impl BorrowFor<OsString> for &str {
 impl BorrowFor<OsString> for &mut str {
     type View = str;
 }
+// `OsString` compares with `&str`, so a doubly referenced string keeps its inner reference.
+#[cfg(feature = "std")]
+impl<'s> BorrowFor<OsString> for &&'s str {
+    type View = &'s str;
+}
 // `&OsStr` compares with `&str` through the reference implementation of `PartialEq`, so the
 // view keeps the reference.
 #[cfg(feature = "std")]
@@ -421,6 +426,10 @@ mod json {
     }
     impl BorrowFor<Value> for &mut str {
         type View = str;
+    }
+    // `Value` compares with `&str`, so a doubly referenced string keeps its inner reference.
+    impl<'s> BorrowFor<Value> for &&'s str {
+        type View = &'s str;
     }
     impl BorrowFor<Value> for String {
         type View = String;

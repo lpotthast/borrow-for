@@ -115,14 +115,15 @@ keeps `&[U]` as its view in a `Cow<[T]>` context, but uses `[U]` in a `Vec<T>` c
 ## UTF-8 strings in OS string contexts
 
 With the `std` feature, a `str` can be borrowed where an OS string is expected, because the
-standard library compares `OsStr` and `OsString` with `str`. The view stays `str`, so a string
-literal can be compared with an OS string without converting it.
+standard library compares `OsStr` and `OsString` with `str`. The view stays a string slice, so a
+string literal can be compared with an OS string without converting it.
 
-| Context    | Input                    | View     | Feature |
-|------------|--------------------------|----------|---------|
-| `OsStr`    | `str`, `&str`, `&mut str` | `str`    | `std`   |
-| `OsString` | `str`, `&str`, `&mut str` | `str`    | `std`   |
-| `&OsStr`   | `&'s str`                | `&'s str` | `std`   |
+| Context    | Input                     | View      | Feature |
+|------------|---------------------------|-----------|---------|
+| `OsStr`    | `str`, `&str`, `&mut str` | `str`     | `std`   |
+| `OsString` | `str`, `&str`, `&mut str` | `str`     | `std`   |
+| `OsString` | `&&'s str`                | `&'s str` | `std`   |
+| `&OsStr`   | `&'s str`                 | `&'s str` | `std`   |
 
 Paths are not covered: the standard library compares `Path` with `str` only since Rust 1.91.
 
@@ -130,13 +131,15 @@ Paths are not covered: the standard library compares `Path` with `str` only sinc
 
 With the `serde_json` feature, strings, numbers, and booleans can be borrowed where a
 `serde_json::Value` is expected, matching the `PartialEq` implementations of `Value`. Each view is
-the input's own type, so `"name"` compares with a JSON string and `3` with a JSON number.
+the input's type without its outer reference, so `"name"` compares with a JSON string and `3` with
+a JSON number.
 
-| Context | Input                                                   | View     | Feature      |
-|---------|---------------------------------------------------------|----------|--------------|
-| `Value` | `str`, `&str`, `&mut str`                               | `str`    | `serde_json` |
-| `Value` | `String`, `&String`, `&mut String`                      | `String` | `serde_json` |
-| `Value` | `S`, `&S`, `&mut S` for every integer, float, and `bool` | `S`      | `serde_json` |
+| Context | Input                                                    | View      | Feature      |
+|---------|----------------------------------------------------------|-----------|--------------|
+| `Value` | `str`, `&str`, `&mut str`                                | `str`     | `serde_json` |
+| `Value` | `&&'s str`                                               | `&'s str` | `serde_json` |
+| `Value` | `String`, `&String`, `&mut String`                       | `String`  | `serde_json` |
+| `Value` | `S`, `&S`, `&mut S` for every integer, float, and `bool` | `S`       | `serde_json` |
 
 ```rust
 # #[cfg(feature = "serde_json")] {

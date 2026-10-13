@@ -11,10 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- `str`, `&str`, and `&mut str` borrow as `str` in `OsStr` and `OsString` contexts, and `&str` borrows as itself in an
-  `&OsStr` context, matching the standard library's comparisons between OS strings and strings.
+- `str`, `&str`, and `&mut str` borrow as `str` in `OsStr` and `OsString` contexts, `&&str` borrows as `&str` in an
+  `OsString` context, and `&str` borrows as itself in an `&OsStr` context, matching the standard library's comparisons
+  between OS strings and strings.
 - The optional `serde_json` feature lets strings, numbers, and booleans borrow for `serde_json::Value` contexts,
-  matching the `PartialEq` implementations of `Value`. It works with `alloc` alone.
+  matching the `PartialEq` implementations of `Value`. A `&&str` borrows as `&str`. It works with `alloc` alone.
 
 ## [0.1.2] - 2026-10-08
 
